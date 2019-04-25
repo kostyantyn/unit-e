@@ -87,31 +87,31 @@ class EsperanzaWithdrawTest(UnitETestFramework):
         self.log.info('deposits are created')
 
         # Generate enough blocks to activate deposits
-        # F    F    F    F    J
-        # e0 - e1 - e2 - e3 - e4 - e5 - e6[26]
+        # F    F    F    F
+        # e0 - e1 - e2 - e3 - e4[16]
         #      d1
         #      d2
-        proposer.generatetoaddress(3 + 5 + 5 + 5 + 5, proposer.getnewaddress('', 'bech32'))
-        assert_equal(proposer.getblockcount(), 25)
-        assert_finalizationstate(proposer, {'currentDynasty': 2,
-                                            'currentEpoch': 5,
-                                            'lastJustifiedEpoch': 4,
-                                            'lastFinalizedEpoch': 3,
+        proposer.generatetoaddress(3 + 5 + 5, proposer.getnewaddress('', 'bech32'))
+        assert_equal(proposer.getblockcount(), 15)
+        assert_finalizationstate(proposer, {'currentDynasty': 1,
+                                            'currentEpoch': 3,
+                                            'lastJustifiedEpoch': 2,
+                                            'lastFinalizedEpoch': 2,
                                             'validators': 0})
 
         proposer.generatetoaddress(1, proposer.getnewaddress('', 'bech32'))
-        assert_equal(proposer.getblockcount(), 26)
-        assert_finalizationstate(proposer, {'currentDynasty': 3,
-                                            'currentEpoch': 6,
-                                            'lastJustifiedEpoch': 4,
-                                            'lastFinalizedEpoch': 3,
+        assert_equal(proposer.getblockcount(), 16)
+        assert_finalizationstate(proposer, {'currentDynasty': 2,
+                                            'currentEpoch': 4,
+                                            'lastJustifiedEpoch': 2,
+                                            'lastFinalizedEpoch': 2,
                                             'validators': 2})
         self.log.info('finalizers are created')
 
         # Logout finalizer1
-        # F    F    F    F    J
-        # e0 - e1 - e2 - e3 - e4 - e5 - e6[26]
-        #      d1                       l1
+        # F    F    F    F
+        # e0 - e1 - e2 - e3 - e4[16, 17, 18, 19, 20]
+        #      d1                        l1
         #      d2
         self.wait_for_vote_and_disconnect(finalizer=finalizer1, node=proposer)
         self.wait_for_vote_and_disconnect(finalizer=finalizer2, node=proposer)
@@ -127,13 +127,13 @@ class EsperanzaWithdrawTest(UnitETestFramework):
         disconnect_nodes(finalizer1, proposer.index)
 
         proposer.generatetoaddress(3, proposer.getnewaddress('', 'bech32'))
-        assert_equal(proposer.getblockcount(), 30)
-        assert_finalizationstate(proposer, {'currentDynasty': 3,
-                                            'currentEpoch': 6,
-                                            'lastJustifiedEpoch': 5,
-                                            'lastFinalizedEpoch': 4,
+        assert_equal(proposer.getblockcount(), 20)
+        assert_finalizationstate(proposer, {'currentDynasty': 2,
+                                            'currentEpoch': 4,
+                                            'lastJustifiedEpoch': 3,
+                                            'lastFinalizedEpoch': 3,
                                             'validators': 2})
-        self.log.info('finalizer1 logged out in dynasty=3')
+        self.log.info('finalizer1 logged out in dynasty=2')
 
         # During LOGOUT_DYNASTY_DELAY both finalizers can vote.
         # Since the finalization happens at every epoch,
@@ -144,28 +144,28 @@ class EsperanzaWithdrawTest(UnitETestFramework):
             self.wait_for_vote_and_disconnect(finalizer=finalizer2, node=proposer)
             proposer.generatetoaddress(4, proposer.getnewaddress('', 'bech32'))
 
-        assert_equal(proposer.getblockcount(), 45)
-        assert_finalizationstate(proposer, {'currentDynasty': 6,
-                                            'currentEpoch': 9,
-                                            'lastJustifiedEpoch': 8,
-                                            'lastFinalizedEpoch': 7,
+        assert_equal(proposer.getblockcount(), 35)
+        assert_finalizationstate(proposer, {'currentDynasty': 5,
+                                            'currentEpoch': 7,
+                                            'lastJustifiedEpoch': 6,
+                                            'lastFinalizedEpoch': 6,
                                             'validators': 2})
 
         self.log.info('finalizer1 voted during logout delay successfully')
 
         # During WITHDRAW_DELAY finalizer1 can't vote and can't withdraw
         proposer.generatetoaddress(1, proposer.getnewaddress('', 'bech32'))
-        assert_finalizationstate(proposer, {'currentDynasty': 7,
-                                            'currentEpoch': 10,
-                                            'lastJustifiedEpoch': 8,
-                                            'lastFinalizedEpoch': 7,
+        assert_finalizationstate(proposer, {'currentDynasty': 6,
+                                            'currentEpoch': 8,
+                                            'lastJustifiedEpoch': 6,
+                                            'lastFinalizedEpoch': 6,
                                             'validators': 1})
         self.wait_for_vote_and_disconnect(finalizer=finalizer2, node=proposer)
         proposer.generatetoaddress(1, proposer.getnewaddress('', 'bech32'))
-        assert_finalizationstate(proposer, {'currentDynasty': 7,
-                                            'currentEpoch': 10,
-                                            'lastJustifiedEpoch': 9,
-                                            'lastFinalizedEpoch': 8,
+        assert_finalizationstate(proposer, {'currentDynasty': 6,
+                                            'currentEpoch': 8,
+                                            'lastJustifiedEpoch': 7,
+                                            'lastFinalizedEpoch': 7,
                                             'validators': 1})
 
         # finalizer1 can't vote so we keep it connected
@@ -174,25 +174,24 @@ class EsperanzaWithdrawTest(UnitETestFramework):
         assert_equal(len(proposer.getrawmempool()), 0)
 
         proposer.generatetoaddress(3, proposer.getnewaddress('', 'bech32'))
-        assert_equal(proposer.getblockcount(), 50)
-        assert_finalizationstate(proposer, {'currentDynasty': 7,
-                                            'currentEpoch': 10,
-                                            'lastJustifiedEpoch': 9,
-                                            'lastFinalizedEpoch': 8,
+        assert_equal(proposer.getblockcount(), 40)
+        assert_finalizationstate(proposer, {'currentDynasty': 6,
+                                            'currentEpoch': 8,
+                                            'lastJustifiedEpoch': 7,
+                                            'lastFinalizedEpoch': 7,
                                             'validators': 1})
 
-        # WITHDRAW_DELAY - 2 is because:
+        # WITHDRAW_DELAY - 1 is because:
         # -1 as we checked the first loop manually
-        # -1 as at this epoch we should be able to withdraw already
-        for _ in range(WITHDRAW_EPOCH_DELAY - 2):
+        for _ in range(WITHDRAW_EPOCH_DELAY - 1):
             proposer.generatetoaddress(1, proposer.getnewaddress('', 'bech32'))
             self.wait_for_vote_and_disconnect(finalizer=finalizer2, node=proposer)
             proposer.generatetoaddress(4, proposer.getnewaddress('', 'bech32'))
 
-        assert_equal(proposer.getblockcount(), 100)
+        assert_equal(proposer.getblockcount(), 95)
         assert_finalizationstate(proposer, {'currentDynasty': 17,
-                                            'currentEpoch': 20,
-                                            'lastJustifiedEpoch': 19,
+                                            'currentEpoch': 19,
+                                            'lastJustifiedEpoch': 18,
                                             'lastFinalizedEpoch': 18,
                                             'validators': 1})
 
@@ -207,15 +206,15 @@ class EsperanzaWithdrawTest(UnitETestFramework):
         self.log.info('finalizer1 could not withdraw during WITHDRAW_DELAY period')
 
         # test that deposit can be withdrawn
-        # e0 - e1 - ... - e6 - ... - e21[101, 102]
-        #      d1         l1                  w1
+        # e0 - e1 - ... - e4 - ... - e20[95, 96, 97]
+        #      d1         l1                     w1
         #      d2
         proposer.generatetoaddress(1, proposer.getnewaddress('', 'bech32'))
         self.wait_for_vote_and_disconnect(finalizer=finalizer2, node=proposer)
-        assert_equal(proposer.getblockcount(), 101)
+        assert_equal(proposer.getblockcount(), 96)
         assert_finalizationstate(proposer, {'currentDynasty': 18,
-                                            'currentEpoch': 21,
-                                            'lastJustifiedEpoch': 19,
+                                            'currentEpoch': 20,
+                                            'lastJustifiedEpoch': 18,
                                             'lastFinalizedEpoch': 18,
                                             'validators': 1})
         sync_blocks([proposer, finalizer1], timeout=10)
@@ -228,8 +227,8 @@ class EsperanzaWithdrawTest(UnitETestFramework):
 
         # test that withdraw commit can be spent
         # test that deposit can be withdrawn
-        # e0 - e1 - ... - e6 - ... - e21[101, 102, 103]
-        #      d1         l1                  w1   spent_w1
+        # e0 - e1 - ... - e4 - ... - e20[95, 96, 97, 98]
+        #      d1         l1                     w1  spent_w1
         #      d2
         spent_w1_raw = finalizer1.createrawtransaction(
             [{'txid': w1, 'vout': 0}], {finalizer1_address: Decimal('1499.999')})
@@ -245,7 +244,7 @@ class EsperanzaWithdrawTest(UnitETestFramework):
 
         # Test that after withdraw the node can deposit again
         sync_blocks([proposer, finalizer1], timeout=10)
-        assert_equal(proposer.getblockcount(), 103)
+        assert_equal(proposer.getblockcount(), 98)
         wait_until(lambda: finalizer1.getvalidatorinfo()['validator_status'] == 'NOT_VALIDATING',
                    timeout=5)
         deposit = finalizer1.deposit(finalizer1.getnewaddress('', 'legacy'), 1500)
@@ -255,7 +254,7 @@ class EsperanzaWithdrawTest(UnitETestFramework):
         self.wait_for_transaction(deposit, timeout=10, nodes=[proposer, finalizer1])
         proposer.generate(1)
         sync_blocks([proposer, finalizer1], timeout=10)
-        assert_equal(proposer.getblockcount(), 104)
+        assert_equal(proposer.getblockcount(), 99)
 
         wait_until(lambda: finalizer1.getvalidatorinfo()['validator_status'] == 'WAITING_DEPOSIT_FINALIZATION',
                    timeout=20)
@@ -266,24 +265,15 @@ class EsperanzaWithdrawTest(UnitETestFramework):
 
         proposer.generate(2)
         self.wait_for_vote_and_disconnect(finalizer=finalizer2, node=proposer)
+        assert_equal(proposer.getblockcount(), 101)
+
+        proposer.generate(5)
+        self.wait_for_vote_and_disconnect(finalizer=finalizer2, node=proposer)
         assert_equal(proposer.getblockcount(), 106)
-
-        proposer.generate(5)
-        self.wait_for_vote_and_disconnect(finalizer=finalizer2, node=proposer)
-        assert_equal(proposer.getblockcount(), 111)
         assert_finalizationstate(proposer, {'currentDynasty': 20,
-                                            'currentEpoch': 23,
-                                            'lastJustifiedEpoch': 21,
+                                            'currentEpoch': 22,
+                                            'lastJustifiedEpoch': 20,
                                             'lastFinalizedEpoch': 20,
-                                            'validators': 1})
-
-        proposer.generate(5)
-        self.wait_for_vote_and_disconnect(finalizer=finalizer2, node=proposer)
-        assert_equal(proposer.getblockcount(), 116)
-        assert_finalizationstate(proposer, {'currentDynasty': 21,
-                                            'currentEpoch': 24,
-                                            'lastJustifiedEpoch': 22,
-                                            'lastFinalizedEpoch': 21,
                                             'validators': 2})
 
         self.wait_for_vote_and_disconnect(finalizer=finalizer1, node=proposer)

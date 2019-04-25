@@ -21,10 +21,6 @@ from test_framework.util import (
 )
 
 
-def generate_block(node):
-    node.generatetoaddress(1, node.getnewaddress('', 'bech32'))
-
-
 def setup_deposit(self, proposer, validators):
     for i, n in enumerate(validators):
         n.new_address = n.getnewaddress("", "legacy")
@@ -37,8 +33,7 @@ def setup_deposit(self, proposer, validators):
 
     # the validator will be ready to operate in epoch 4
     # TODO: UNIT - E: it can be 2 epochs as soon as #572 is fixed
-    for n in range(0, 30):
-        generate_block(proposer)
+    proposer.generatetoaddress(30, proposer.getnewaddress('', 'bech32'))
 
     assert_equal(proposer.getblockcount(), 31)
 
@@ -81,15 +76,14 @@ class FinalizationForkChoice(UnitETestFramework):
 
         self.log.info("Setup test prerequisites")
         # get to up to block 49, just one before the new checkpoint
-        for _ in range(18):
-            generate_block(p0)
+        p0.generatetoaddress(18, p0.getnewaddress('', 'bech32'))
 
         assert_equal(p0.getblockcount(), 49)
         sync_blocks([p0, p1, p2, v0])
 
         assert_finalizationstate(p0, {'currentEpoch': 5,
                                       'lastJustifiedEpoch': 4,
-                                      'lastFinalizedEpoch': 3})
+                                      'lastFinalizedEpoch': 4})
 
         # disconnect p0
         # v0: p1, p2
@@ -114,23 +108,22 @@ class FinalizationForkChoice(UnitETestFramework):
         disconnect_nodes(p1, v0.index)
 
         # generate long chain in p0 but don't justify it
-        #  F     J
+        #  F     F
         # 30 .. 40 .. 89    -- p0
-        for _ in range(40):
-            generate_block(p0)
+        p0.generatetoaddress(40, p0.getnewaddress('', 'bech32'))
 
         assert_equal(p0.getblockcount(), 89)
         assert_finalizationstate(p0, {'currentEpoch': 9,
                                       'lastJustifiedEpoch': 4,
-                                      'lastFinalizedEpoch': 3})
+                                      'lastFinalizedEpoch': 4})
 
         # generate short chain in p1 and justify it
         # on the 6th and 7th epochs sync with validator
-        #  F     J
+        #  F     F
         # 30 .. 40 .. 49 .. .. .. .. .. .. 89    -- p0
         #               \
         #                50 .. 60 .. 69          -- p1
-        #                 F     J
+        #                 J     F
         # get to the 6th epoch
         p1.generatetoaddress(2, p1.getnewaddress('', 'bech32'))
         self.wait_for_vote_and_disconnect(finalizer=v0, node=p1)
@@ -145,7 +138,7 @@ class FinalizationForkChoice(UnitETestFramework):
         assert_equal(p1.getblockcount(), 69)
         assert_finalizationstate(p1, {'currentEpoch': 7,
                                       'lastJustifiedEpoch': 6,
-                                      'lastFinalizedEpoch': 5})
+                                      'lastFinalizedEpoch': 6})
 
         # connect p2 with p0 and p1; p2 must switch to the longest justified p1
         # v0: p1
@@ -162,10 +155,10 @@ class FinalizationForkChoice(UnitETestFramework):
 
         assert_finalizationstate(p1, {'currentEpoch': 7,
                                       'lastJustifiedEpoch': 6,
-                                      'lastFinalizedEpoch': 5})
+                                      'lastFinalizedEpoch': 6})
         assert_finalizationstate(p2, {'currentEpoch': 7,
                                       'lastJustifiedEpoch': 6,
-                                      'lastFinalizedEpoch': 5})
+                                      'lastFinalizedEpoch': 6})
 
         # connect p0 with p1, p0 must disconnect its longest but not justified fork and choose p1
         # v0: p1
@@ -183,16 +176,15 @@ class FinalizationForkChoice(UnitETestFramework):
 
         # generate more blocks to make sure they're processed
         self.log.info("Test all nodes continue to work as usual")
-        for _ in range(30):
-            generate_block(p0)
+        p0.generatetoaddress(30, p0.getnewaddress('', 'bech32'))
         sync_chain([p0, p1, p2, v0])
         assert_equal(p0.getblockcount(), 99)
-        for _ in range(30):
-            generate_block(p1)
+
+        p1.generatetoaddress(30, p1.getnewaddress('', 'bech32'))
         sync_chain([p0, p1, p2, v0])
         assert_equal(p1.getblockcount(), 129)
-        for _ in range(30):
-            generate_block(p2)
+
+        p2.generatetoaddress(30, p2.getnewaddress('', 'bech32'))
         sync_chain([p0, p1, p2, v0])
         assert_equal(p2.getblockcount(), 159)
 
@@ -206,12 +198,11 @@ class FinalizationForkChoice(UnitETestFramework):
         disconnect_nodes(p0, p1.index)
         disconnect_nodes(p0, p2.index)
         disconnect_nodes(p1, p2.index)
-        for _ in range(10):
-            generate_block(p0)
-        for _ in range(20):
-            generate_block(p1)
-        for _ in range(30):
-            generate_block(p2)
+
+        p0.generatetoaddress(10, p0.getnewaddress('', 'bech32'))
+        p1.generatetoaddress(20, p1.getnewaddress('', 'bech32'))
+        p2.generatetoaddress(30, p2.getnewaddress('', 'bech32'))
+
         assert_equal(p0.getblockcount(), 169)
         assert_equal(p1.getblockcount(), 179)
         assert_equal(p2.getblockcount(), 189)

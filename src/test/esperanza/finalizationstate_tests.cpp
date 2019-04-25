@@ -70,7 +70,6 @@ BOOST_AUTO_TEST_CASE(initialize_epoch_wrong_height_passed) {
 }
 
 BOOST_AUTO_TEST_CASE(initialize_epoch_insta_justify) {
-
   finalization::Params params;
   FinalizationStateSpy spy(params);
   BOOST_CHECK_EQUAL(spy.GetCurrentEpoch(), 0);
@@ -87,19 +86,19 @@ BOOST_AUTO_TEST_CASE(initialize_epoch_insta_justify) {
   BOOST_CHECK_EQUAL(res, +Result::SUCCESS);
   BOOST_CHECK_EQUAL(spy.GetCurrentEpoch(), 2);
   BOOST_CHECK_EQUAL(spy.GetLastJustifiedEpoch(), 1);
-  BOOST_CHECK_EQUAL(spy.GetLastFinalizedEpoch(), 0);
+  BOOST_CHECK_EQUAL(spy.GetLastFinalizedEpoch(), 1);
 
   res = spy.InitializeEpoch(1 + 2 * spy.EpochLength());
   BOOST_CHECK_EQUAL(res, +Result::SUCCESS);
   BOOST_CHECK_EQUAL(spy.GetCurrentEpoch(), 3);
   BOOST_CHECK_EQUAL(spy.GetLastJustifiedEpoch(), 2);
-  BOOST_CHECK_EQUAL(spy.GetLastFinalizedEpoch(), 1);
+  BOOST_CHECK_EQUAL(spy.GetLastFinalizedEpoch(), 2);
 
   res = spy.InitializeEpoch(1 + 3 * spy.EpochLength());
   BOOST_CHECK_EQUAL(res, +Result::SUCCESS);
   BOOST_CHECK_EQUAL(spy.GetCurrentEpoch(), 4);
   BOOST_CHECK_EQUAL(spy.GetLastJustifiedEpoch(), 3);
-  BOOST_CHECK_EQUAL(spy.GetLastFinalizedEpoch(), 2);
+  BOOST_CHECK_EQUAL(spy.GetLastFinalizedEpoch(), 3);
 }
 
 // This tests assumes block time of 4s, hence epochs every 200s, and return of

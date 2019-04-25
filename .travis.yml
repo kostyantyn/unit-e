@@ -1,6 +1,7 @@
 branches:
   only:
     - master
+    - finalize_latest_epoch
 sudo: required
 dist: trusty
 os: linux

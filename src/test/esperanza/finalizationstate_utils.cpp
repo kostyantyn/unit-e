@@ -98,16 +98,16 @@ void FinalizationStateSpy::CreateAndActivateDeposit(const uint160 &validator_add
 
   ProcessDeposit(validator_address, deposit_size);
 
-  for (uint32_t i = 1; i < 6 * EpochLength() + 1; i += EpochLength()) {
+  for (uint32_t i = 1; i < 4 * EpochLength() + 1; i += EpochLength()) {
     BOOST_REQUIRE_EQUAL(GetActiveFinalizers().size(), 0);
 
     res = InitializeEpoch(i);
     BOOST_REQUIRE_EQUAL(res, +Result::SUCCESS);
   }
 
-  BOOST_REQUIRE_EQUAL(GetCurrentDynasty(), 3);
-  BOOST_REQUIRE_EQUAL(GetCurrentEpoch(), 6);
-  BOOST_REQUIRE_EQUAL(GetLastJustifiedEpoch(), 4);
-  BOOST_REQUIRE_EQUAL(GetLastFinalizedEpoch(), 3);
+  BOOST_REQUIRE_EQUAL(GetCurrentDynasty(), 2);
+  BOOST_REQUIRE_EQUAL(GetCurrentEpoch(), 4);
+  BOOST_REQUIRE_EQUAL(GetLastJustifiedEpoch(), 2);
+  BOOST_REQUIRE_EQUAL(GetLastFinalizedEpoch(), 2);
   BOOST_REQUIRE_EQUAL(GetActiveFinalizers().size(), 1);
 }

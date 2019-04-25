@@ -113,7 +113,6 @@ BASE_SCRIPTS= [
     'rpc_tracestake.py',
     'wallet_accounts.py',
     'wallet_listreceivedby.py',
-    'feature_commits_forkchoice.py',
     'feature_ltor.py',
     'wallet_keypool_topup.py',
     'p2p_commits.py',
@@ -227,7 +226,9 @@ USBDEVICE_SCRIPTS = [
     'wallet_hwsign.py',
 ]
 
-DISABLED_SCRIPTS = []
+DISABLED_SCRIPTS = [
+    'feature_commits_forkchoice.py',
+]
 
 # Place EXTENDED_SCRIPTS first since it has the 3 longest running tests
 ALL_SCRIPTS = EXTENDED_SCRIPTS + BASE_SCRIPTS + DISABLED_SCRIPTS + USBDEVICE_SCRIPTS
