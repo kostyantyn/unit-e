@@ -70,7 +70,7 @@ class FinalizatoinStateRestoration(UnitETestFramework):
 
         assert_finalizationstate(p, {'currentEpoch': 7,
                                      'lastJustifiedEpoch': 6,
-                                     'lastFinalizedEpoch': 5,
+                                     'lastFinalizedEpoch': 6,
                                      'validators': 1})
 
         self.log.info("Restarting proposer")
@@ -86,7 +86,7 @@ class FinalizatoinStateRestoration(UnitETestFramework):
         # it is not connected to validator so that finalization shouldn't move
         assert_finalizationstate(p, {'currentEpoch': 9,
                                      'lastJustifiedEpoch': 6,
-                                     'lastFinalizedEpoch': 5,
+                                     'lastFinalizedEpoch': 6,
                                      'validators': 1})
 
         # connect validator and check how it votes
@@ -96,7 +96,7 @@ class FinalizatoinStateRestoration(UnitETestFramework):
         assert_equal(p.getblockcount(), 45)
         assert_finalizationstate(p, {'currentEpoch': 9,
                                      'lastJustifiedEpoch': 8,
-                                     'lastFinalizedEpoch': 5,
+                                     'lastFinalizedEpoch': 6,
                                      'validators': 1})
 
         self.generate_epoch(p, v, count=2)
@@ -104,7 +104,7 @@ class FinalizatoinStateRestoration(UnitETestFramework):
         assert_equal(p.getblockcount(), 55)
         assert_finalizationstate(p, {'currentEpoch': 11,
                                      'lastJustifiedEpoch': 10,
-                                     'lastFinalizedEpoch': 9,
+                                     'lastFinalizedEpoch': 10,
                                      'validators': 1})
 
         self.log.info("Restarting validator")
@@ -118,7 +118,7 @@ class FinalizatoinStateRestoration(UnitETestFramework):
         assert_equal(p.getblockcount(), 65)
         assert_finalizationstate(p, {'currentEpoch': 13,
                                      'lastJustifiedEpoch': 12,
-                                     'lastFinalizedEpoch': 11,
+                                     'lastFinalizedEpoch': 12,
                                      'validators': 1})
         connect_nodes(p, v.index)
         sync_blocks([p, v])
@@ -134,14 +134,14 @@ class FinalizatoinStateRestoration(UnitETestFramework):
         sync_blocks([p, v])
         assert_finalizationstate(p, {'currentEpoch': 13,
                                      'lastJustifiedEpoch': 12,
-                                     'lastFinalizedEpoch': 11,
+                                     'lastFinalizedEpoch': 12,
                                      'validators': 1})
 
         self.log.info("Restart proposer")
         self.restart_node(p)
         assert_finalizationstate(p, {'currentEpoch': 13,
                                      'lastJustifiedEpoch': 12,
-                                     'lastFinalizedEpoch': 11,
+                                     'lastFinalizedEpoch': 12,
                                      'validators': 1})
 
 if __name__ == '__main__':
