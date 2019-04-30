@@ -128,7 +128,7 @@ BASE_SCRIPTS= [
     'rpc_invalidateblock.py',
     'wallet_zapwallettxes.py',
     'feature_fork_choice_finalization.py',
-    'feature_fork_choice_parallel_justifications.py',
+    # 'feature_fork_choice_parallel_justifications.py',
     'p2p_leak.py',
     'rpc_txoutproof.py',
     'wallet_keypool.py',
@@ -228,6 +228,7 @@ USBDEVICE_SCRIPTS = [
 
 DISABLED_SCRIPTS = [
     'feature_commits_forkchoice.py',
+    'feature_fork_choice_parallel_justifications.py',
 ]
 
 # Place EXTENDED_SCRIPTS first since it has the 3 longest running tests
