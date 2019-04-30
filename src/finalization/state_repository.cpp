@@ -212,7 +212,7 @@ void RepositoryImpl::CheckAndRecover(Dependency<finalization::StateProcessor> pr
 
   const uint32_t last_finalized_epoch = state->GetLastFinalizedEpoch();
 
-  const blockchain::Height height = last_finalized_epoch == 0 ? 0 : m_finalization_params->GetEpochCheckpointHeight(last_finalized_epoch + 1);
+  const blockchain::Height height = m_finalization_params->GetEpochCheckpointHeight(last_finalized_epoch);
 
   std::set<const CBlockIndex *> unrecoverable;
 
